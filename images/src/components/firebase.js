@@ -4,7 +4,7 @@ import 'firebase/compat/firestore';
 import 'firebase/compat/storage'; // Add import for storage
 
 const firebaseConfig = {
-  apiKey: "",
+  apiKey: process.env.APIKEY,
   authDomain: "loginpage-a8bb1.firebaseapp.com",
   databaseURL: "https://loginpage-a8bb1-default-rtdb.firebaseio.com",
   projectId: "loginpage-a8bb1",
