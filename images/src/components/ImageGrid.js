@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { storage } from './firebase';
-import { FaTrash, FaEye, FaTimes } from 'react-icons/fa';
+import { getDownloadURL } from 'firebase/storage';
+import { FaTrash, FaEye, FaTimes, FaDownload } from 'react-icons/fa'; // Import FaDownload icon
 import './imagegrid.css'; // Import the CSS file for styling
 
 const ImageGrid = ({ userUID }) => {
@@ -58,6 +59,35 @@ const ImageGrid = ({ userUID }) => {
     setSelectedImage(null);
   };
 
+  const handleDownload = async (imageUrl, imageName) => {
+    console.log('Downloading:', imageUrl, imageName); // Check if this log appears in the console
+  
+    try {
+      const downloadURL = await getDownloadURL(storage.ref(`users/${userUID}/images/${imageName}`));
+      console.log('Download URL:', downloadURL); // Check if this log shows the correct download URL
+  
+      const response = await fetch(downloadURL, { mode: 'no-cors' });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+  
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = imageName; // Set the download attribute to the image name
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+  
+      // Clean up the object URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  };
+  
+  
+
+  
+
   return (
     <div className="image-grid-container">
       {images.map(image => (
@@ -65,6 +95,7 @@ const ImageGrid = ({ userUID }) => {
           <img src={image.url} alt={`Uploaded by user`} />
           <div className="image-overlay">
             <button onClick={() => handleDelete(image.id)} className="delete-button"><FaTrash /></button>
+            <button onClick={() => handleDownload(image.url, image.id)} className="download-button"><FaDownload /></button> {/* Add download button */}
           </div>
         </div>
       ))}
