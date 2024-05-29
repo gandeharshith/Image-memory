@@ -110,7 +110,7 @@ const ImageUpload = ({ userUID, onUpload }) => {
     }
 
     files.forEach((file, index) => {
-      const uploadTask = storage.ref(`users/${userUID}/uploads/${file.name}`).put(file);
+      const uploadTask = storage.ref(`users/${userUID}/files/${file.name}`).put(file);
 
       uploadTask.on('state_changed',
         (snapshot) => {
@@ -121,12 +121,13 @@ const ImageUpload = ({ userUID, onUpload }) => {
           console.error('Error uploading file:', error);
         },
         () => {
-          storage.ref(`users/${userUID}/uploads`).child(file.name).getDownloadURL()
+          storage.ref(`users/${userUID}/files`).child(file.name).getDownloadURL()
             .then(url => {
-              firestore.collection('uploads').add({
+              firestore.collection('files').add({
                 url,
                 userId: userUID,
-                type: file.type
+                fileName: file.name,
+                fileType: file.type.startsWith('image/') ? 'image' : 'text'
               });
               onUpload(file.name); // Pass the file name to the onUpload callback
               // Remove the uploaded file from the state
@@ -145,7 +146,7 @@ const ImageUpload = ({ userUID, onUpload }) => {
   };
 
   return (
-    <div className="image-upload-container">
+    <div className="file-upload-container">
       {files.length > 0 && files.map((file, index) => (
         <p key={index} className="selected-file-name">{file.name}</p>
       ))}
@@ -154,7 +155,7 @@ const ImageUpload = ({ userUID, onUpload }) => {
         <input
           type="file"
           id="file-upload"
-          accept=".png,.txt" // Allow .png and .txt files
+          accept=".png, .jpg, .jpeg, .txt"
           onChange={handleChange}
           className="file-input"
           multiple 
